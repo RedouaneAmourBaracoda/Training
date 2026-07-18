@@ -28,10 +28,6 @@ struct TaskView: View {
     }
 }
 
-extension Task {
-    static let `default`: Task = .init(name: "First task", isDone: true)
-}
-
 #Preview {
-    TaskView(task: .default)
+    TaskView(task: .random())
 }
