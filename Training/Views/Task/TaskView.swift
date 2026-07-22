@@ -17,7 +17,7 @@ struct TaskView: View {
 
     var body: some View {
         HStack {
-            Image(systemName: task.isDone ? "checkmark.circle" : "circle")
+            Image(systemName: task.isCompleted ? "checkmark.circle" : "circle")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Spacer()
