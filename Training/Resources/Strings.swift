@@ -10,6 +10,7 @@ import Foundation
 enum Resources {
     enum Titles {
         static let navigationStackTitle = "My Tasks"
+        static let textFieldPlaceholder = "New task"
     }
     
     enum tasks {
