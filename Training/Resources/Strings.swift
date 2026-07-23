@@ -9,11 +9,11 @@ import Foundation
 
 enum Resources {
     enum Titles {
-        static let navigationStackTitle = "My Tasks"
+        static let navigationStackTitle = "My tasks"
         static let textFieldPlaceholder = "New task"
     }
     
-    enum tasks {
+    enum TodoTasks {
         static let dummies: [String] = [
             "Buy milk",
             "Walk dog",

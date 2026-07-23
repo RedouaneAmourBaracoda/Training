@@ -1,5 +1,5 @@
 //
-//  Task.swift
+//  TodoTask.swift
 //  Training
 //
 //  Created by Redouane Amour on 15/07/2026.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Task: Identifiable {
+struct TodoTask: Identifiable {
     let id: UUID = .init()
     let name: String
     let isCompleted: Bool
@@ -18,19 +18,19 @@ struct Task: Identifiable {
     }
 }
 
-extension Task: Equatable {
-    static func == (lhs: Task, rhs: Task) -> Bool {
+extension TodoTask: Equatable {
+    static func == (lhs: TodoTask, rhs: TodoTask) -> Bool {
         lhs.name == rhs.name
     }
 }
 
-extension Task: Hashable {
+extension TodoTask: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
 }
 
-extension Array<Task> {
+extension Array<TodoTask> {
     static func random() -> Self {
         let randomTasks: Self = (0..<Int.random(in: 1...10)).map { _ in .random() }
         let uniqueTasks = Set(randomTasks)
@@ -38,10 +38,10 @@ extension Array<Task> {
     }
 }
 
-extension Task {
+extension TodoTask {
     static func random() -> Self {
         .init(
-            name: Resources.tasks.dummies.randomElement() ?? Resources.tasks.default,
+            name: Resources.TodoTasks.dummies.randomElement() ?? Resources.TodoTasks.default,
             isCompleted: .random()
         )
     }

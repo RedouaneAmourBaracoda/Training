@@ -7,19 +7,17 @@
 
 import SwiftUI
 
-struct TaskListView: View {
-    @StateObject private var viewModel: TaskListViewModel
+struct TodoTaskListView: View {
+    @StateObject private var viewModel: TodoTaskListViewModel
 
-    init(tasks: [Task] = []) {
-        self._viewModel = StateObject(wrappedValue: TaskListViewModel(list: .init(tasks: tasks)))
+    init(todoTasks: [TodoTask] = []) {
+        self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(list: .init(todoTasks: todoTasks)))
     }
 
     var body: some View {
         NavigationStack {
             VStack {
-                Spacer()
                 list()
-                Spacer()
                 button()
             }
             .navigationTitle(Resources.Titles.navigationStackTitle)
@@ -30,11 +28,18 @@ struct TaskListView: View {
     }
     
     private func list() -> some View {
-        ForEach(viewModel.list.tasks) { task in
-            TaskView(task: task)
-                .onTapGesture {
-                    viewModel.select(task)
-                }
+        List {
+            ForEach(viewModel.list.todoTasks) { todoTask in
+                TodoTaskView(todoTask: todoTask)
+                    .onTapGesture { viewModel.select(todoTask) }
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            viewModel.delete(todoTask)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
+            }
         }
     }
 
@@ -70,5 +75,5 @@ struct TaskListView: View {
 }
 
 #Preview {
-    TaskListView(tasks: .random())
+    TodoTaskListView(todoTasks: .random())
 }
