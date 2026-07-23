@@ -38,12 +38,12 @@ struct TodoTaskList {
     }
 
     private mutating func moveDown(_ todoTask: TodoTask) {
-        todoTasks.removeAll { $0.name == todoTask.name }
-        todoTasks.append(.init(name: todoTask.name, isCompleted: true))
+        todoTasks.removeAll { $0.id == todoTask.id }
+        todoTasks.append(.init(id: todoTask.id, name: todoTask.name, isCompleted: true))
     }
 
     private mutating func moveUp(_ todoTask: TodoTask) {
-        todoTasks.removeAll { $0.name == todoTask.name }
-        todoTasks = [.init(name: todoTask.name, isCompleted: false)] + todoTasks
+        todoTasks.removeAll { $0.id == todoTask.id }
+        todoTasks = [.init(id: todoTask.id, name: todoTask.name, isCompleted: false)] + todoTasks
     }
 }

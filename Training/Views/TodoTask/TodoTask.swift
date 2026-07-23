@@ -8,11 +8,12 @@
 import Foundation
 
 struct TodoTask: Identifiable {
-    let id: UUID = .init()
+    let id: UUID
     let name: String
     let isCompleted: Bool
     
-    init(name: String, isCompleted: Bool) {
+    init(id: UUID = .init(), name: String, isCompleted: Bool) {
+        self.id = id
         self.name = name
         self.isCompleted = isCompleted
     }
@@ -20,7 +21,7 @@ struct TodoTask: Identifiable {
 
 extension TodoTask: Equatable {
     static func == (lhs: TodoTask, rhs: TodoTask) -> Bool {
-        lhs.name == rhs.name
+        lhs.name == rhs.name && lhs.isCompleted == rhs.isCompleted
     }
 }
 
