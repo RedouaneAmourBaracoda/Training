@@ -12,24 +12,19 @@ final class TodoTaskListViewModel: ObservableObject {
     @Published var list: TodoTaskList
     @Published var isSheetPresented: Bool = false
     @Published var text: String = ""
+    var uncompletedTasksCount: Int {
+        list.unCompletedTasksCount
+    }
 
     init(list: TodoTaskList) {
         self.list = list
     }
 
     func save() {
-        guard !text.isEmpty else { return }
         let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedText.isEmpty else {
-            return
-        }
+        guard !trimmedText.isEmpty else { return }
         list.add(trimmedText)
-        list.add(text)
         dismissSheet()
-    }
-    
-    func uncompletedTasksCount() -> Int {
-        list.unCompletedTasksCount
     }
 
     func delete(_ todoTask: TodoTask) {
