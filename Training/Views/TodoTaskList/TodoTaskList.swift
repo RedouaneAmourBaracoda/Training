@@ -8,7 +8,11 @@
 import Foundation
 
 struct TodoTaskList {
-    var todoTasks: [TodoTask]
+    private(set) var todoTasks: [TodoTask]
+
+    var unCompletedTasksCount: Int {
+        todoTasks.filter { !$0.isCompleted }.count
+    }
 
     init(todoTasks: [TodoTask]) {
         self.todoTasks = todoTasks
@@ -23,6 +27,10 @@ struct TodoTaskList {
         guard !todoTasks.contains(where: { $0.name == name }) else { return }
         let newTodoTask: TodoTask = .init(name: name, isCompleted: false)
         moveUp(newTodoTask)
+    }
+    
+    mutating func delete(_ todoTask: TodoTask) {
+        todoTasks.removeAll { $0.id == todoTask.id }
     }
 
     private mutating func sort() {

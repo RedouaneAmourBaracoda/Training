@@ -11,8 +11,9 @@ enum Resources {
     enum Titles {
         static let navigationStackTitle = "My tasks"
         static let textFieldPlaceholder = "New task"
+        static let remainingTasks = "Remaining tasks : "
     }
-    
+
     enum TodoTasks {
         static let dummies: [String] = [
             "Buy milk",
@@ -26,7 +27,7 @@ enum Resources {
             "Write code",
             "Plan trip"
         ]
-        
+
         static let `default`: String = "Random task"
     }
 }

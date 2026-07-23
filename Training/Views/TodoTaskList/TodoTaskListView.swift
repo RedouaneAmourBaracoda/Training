@@ -40,6 +40,7 @@ struct TodoTaskListView: View {
                         }
                     }
             }
+            Text(Resources.Titles.remainingTasks + "\(viewModel.uncompletedTasksCount())")
         }
     }
 

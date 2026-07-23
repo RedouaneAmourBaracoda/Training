@@ -28,8 +28,12 @@ final class TodoTaskListViewModel: ObservableObject {
         dismissSheet()
     }
     
+    func uncompletedTasksCount() -> Int {
+        list.unCompletedTasksCount
+    }
+
     func delete(_ todoTask: TodoTask) {
-        list.todoTasks.removeAll { $0.id == todoTask.id }
+        list.delete(todoTask)
     }
 
     func select(_ todoTask: TodoTask) {
