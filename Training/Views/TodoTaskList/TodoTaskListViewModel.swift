@@ -8,14 +8,14 @@
 import Combine
 import Foundation
 
-enum AddTodoState {
+fileprivate enum AddTodoState {
     case idle
     case isLoading
 }
 
 final class TodoTaskListViewModel: ObservableObject {
     @Published var list: TodoTaskList
-    @Published var addTodoState: AddTodoState = .idle
+    @Published private var addTodoState: AddTodoState = .idle
     var uncompletedTasksCount: Int {
         list.unCompletedTasksCount
     }
@@ -42,7 +42,6 @@ final class TodoTaskListViewModel: ObservableObject {
             list.add(newTodoTask)
             return .success(())
         } catch {
-            print("REDOUANE ISSUE.")
             return .failure(error)
         }
     }
