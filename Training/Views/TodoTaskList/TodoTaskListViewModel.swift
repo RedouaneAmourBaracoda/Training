@@ -9,8 +9,8 @@ import Combine
 import Foundation
 
 final class TodoTaskListViewModel: ObservableObject {
-    @Published var list: TodoTaskList
-    @Published var isLoading : Bool = false
+    @Published private(set) var list: TodoTaskList
+    @Published private(set) var isLoading : Bool = false
     var uncompletedTasksCount: Int {
         list.unCompletedTasksCount
     }

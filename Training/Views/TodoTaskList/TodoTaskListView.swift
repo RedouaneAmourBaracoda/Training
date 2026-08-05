@@ -92,6 +92,7 @@ struct TodoTaskListView: View {
     private func saveTodoTaskButton() -> some View {
         Button(role: .confirm) {
             saveTask = Task {
+                defer { saveTask = nil }
                 do {
                     try await viewModel.save(todoTaskName: text)
                     dismissSheet()
@@ -99,7 +100,6 @@ struct TodoTaskListView: View {
                     guard !Task.isCancelled else { return }
                     presentAlert(error: error)
                 }
-                saveTask = nil
             }
         }
         .disabled(viewModel.isLoading)
