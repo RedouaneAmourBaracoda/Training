@@ -99,6 +99,7 @@ struct TodoTaskListView: View {
                     guard !Task.isCancelled else { return }
                     presentAlert(error: error)
                 }
+                saveTask = nil
             }
         }
         .disabled(viewModel.isLoading)
