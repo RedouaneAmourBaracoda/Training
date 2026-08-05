@@ -9,6 +9,10 @@ import SwiftUI
 
 struct TodoTaskListView: View {
     @StateObject private var viewModel: TodoTaskListViewModel
+    @State private var text: String = ""
+    @State private var showSheet: Bool = false
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String?
 
     init(todoTasks: [TodoTask] = []) {
         self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(list: .init(todoTasks: todoTasks)))
@@ -18,10 +22,10 @@ struct TodoTaskListView: View {
         NavigationStack {
             VStack {
                 list()
-                button()
+                addTodoTaskButton()
             }
             .navigationTitle(Resources.Titles.navigationStackTitle)
-            .sheet(isPresented: $viewModel.isSheetPresented) {
+            .sheet(isPresented: $showSheet) {
                 sheetContent()
             }
         }
@@ -31,7 +35,7 @@ struct TodoTaskListView: View {
         List {
             ForEach(viewModel.list.todoTasks) { todoTask in
                 TodoTaskView(todoTask: todoTask)
-                    .onTapGesture { viewModel.select(todoTask) }
+                    .onTapGesture { viewModel.toggleCompletion(todoTask) }
                     .swipeActions {
                         Button(role: .destructive) {
                             viewModel.delete(todoTask)
@@ -44,9 +48,9 @@ struct TodoTaskListView: View {
         }
     }
 
-    private func button() -> some View {
+    private func addTodoTaskButton() -> some View {
         Button {
-            viewModel.presentSheet()
+            showSheet = true
         } label: {
             Image(systemName: "plus")
                 .resizable()
@@ -58,20 +62,82 @@ struct TodoTaskListView: View {
     private func sheetContent() -> some View {
         VStack {
             HStack {
-                Button(role: .cancel) {
-                    viewModel.dismissSheet()
-                }
+                cancelTodoTaskButton()
                 Spacer()
-                Button(role: .confirm) {
-                    viewModel.save()
-                }
+                saveTodoTaskButton()
             }
             Spacer()
-            TextField(Resources.Titles.textFieldPlaceholder, text: $viewModel.text)
+            TextField(Resources.Titles.textFieldPlaceholder, text: $text)
                 .textFieldStyle(.roundedBorder)
             Spacer()
         }
+        .loadingActivity(isAnimating: viewModel.isLoading)
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text(alertMessage ?? "Error"), dismissButton: .cancel(Text("Ok"), action: {
+                alertMessage = nil
+            }))
+        }
         .padding()
+    }
+    
+    private func cancelTodoTaskButton() -> some View {
+        Button(role: .cancel) {
+            dismissSheet()
+        }
+    }
+    
+    private func saveTodoTaskButton() -> some View {
+        Button(role: .confirm) {
+            Task {
+                let result = await viewModel.save(todoTaskName: text)
+                switch result {
+                case .success(()):
+                    dismissSheet()
+                case let .failure(error):
+                    presentAlert(error: error)
+                }
+            }
+        }
+        .disabled(viewModel.isLoading)
+    }
+
+    private func presentAlert(error: Error) {
+        if let error = error as? AddTodoError {
+            alertMessage = error.description
+        } else {
+            alertMessage = AddTodoError.unknown.description
+        }
+        showAlert = true
+    }
+
+    private func dismissSheet() {
+        showSheet = false
+        text = ""
+    }
+}
+
+fileprivate extension View {
+    func loadingActivity(isAnimating: Bool) -> some View {
+        modifier(LoadingActivity(isAnimating: isAnimating))
+    }
+}
+
+fileprivate struct LoadingActivity: ViewModifier {
+    private let isAnimating: Bool
+    
+    init(isAnimating: Bool) {
+        self.isAnimating = isAnimating
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                if isAnimating {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.blue)
+                }
+            }
     }
 }
 

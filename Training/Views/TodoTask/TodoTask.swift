@@ -10,12 +10,24 @@ import Foundation
 struct TodoTask: Identifiable {
     let id: UUID
     let name: String
-    let isCompleted: Bool
+    var isCompleted: Bool
     
-    init(id: UUID = .init(), name: String, isCompleted: Bool) {
+    init(id: UUID = .init(), name: String, isCompleted: Bool = false) {
         self.id = id
         self.name = name
         self.isCompleted = isCompleted
+    }
+    
+    mutating func toggleCompletion() {
+        isCompleted ? unComplete() : complete()
+    }
+    
+    private mutating func complete() {
+        isCompleted = true
+    }
+    
+    private mutating func unComplete() {
+        isCompleted = false
     }
 }
 

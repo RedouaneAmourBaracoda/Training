@@ -8,39 +8,49 @@
 import Combine
 import Foundation
 
+enum AddTodoState {
+    case idle
+    case isLoading
+}
+
 final class TodoTaskListViewModel: ObservableObject {
     @Published var list: TodoTaskList
-    @Published var isSheetPresented: Bool = false
-    @Published var text: String = ""
+    @Published var addTodoState: AddTodoState = .idle
     var uncompletedTasksCount: Int {
         list.unCompletedTasksCount
     }
+    var isLoading : Bool {
+        switch addTodoState {
+        case .isLoading: return true
+        default : return false
+        }
+    }
+    private let addTodoUseCase: AddTodoUseCaseType
 
-    init(list: TodoTaskList) {
+    init(list: TodoTaskList, addTodoUseCase: AddTodoUseCaseType = AddTodoUseCase()) {
         self.list = list
+        self.addTodoUseCase = addTodoUseCase
     }
 
-    func save() {
-        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedText.isEmpty else { return }
-        list.add(trimmedText)
-        dismissSheet()
+    func save(todoTaskName: String) async -> Result<Void, Error> {
+        addTodoState = .isLoading
+        defer {
+            addTodoState = .idle
+        }
+        do {
+            let newTodoTask = try await addTodoUseCase.create(todoTaskName: todoTaskName)
+            list.add(newTodoTask)
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
     }
 
     func delete(_ todoTask: TodoTask) {
         list.delete(todoTask)
     }
-
-    func select(_ todoTask: TodoTask) {
-        list.check(todoTask)
-    }
-
-    func dismissSheet() {
-        isSheetPresented = false
-        text = ""
-    }
-
-    func presentSheet() {
-        isSheetPresented = true
+    
+    func toggleCompletion(_ todoTask: TodoTask) {
+        list.toggleCompletion(todoTask)
     }
 }

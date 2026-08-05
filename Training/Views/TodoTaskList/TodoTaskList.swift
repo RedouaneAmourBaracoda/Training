@@ -19,31 +19,23 @@ struct TodoTaskList {
         sort()
     }
 
-    mutating func check(_ todoTask: TodoTask) {
-        todoTask.isCompleted ? moveUp(todoTask) : moveDown(todoTask)
+    mutating func toggleCompletion(_ todoTask: TodoTask) {
+        guard let index = todoTasks.firstIndex(where: { $0.id == todoTask.id }) else { return }
+        todoTasks[index].toggleCompletion()
+        sort()
     }
 
-    mutating func add(_ name: String) {
-        guard !todoTasks.contains(where: { $0.name == name }) else { return }
-        let newTodoTask: TodoTask = .init(name: name, isCompleted: false)
-        moveUp(newTodoTask)
+    mutating func add(_ newTodoTask: TodoTask) {
+        todoTasks.append(newTodoTask)
+        sort()
     }
     
     mutating func delete(_ todoTask: TodoTask) {
         todoTasks.removeAll { $0.id == todoTask.id }
+        sort()
     }
 
     private mutating func sort() {
         todoTasks.sort { !$0.isCompleted && $1.isCompleted }
-    }
-
-    private mutating func moveDown(_ todoTask: TodoTask) {
-        todoTasks.removeAll { $0.id == todoTask.id }
-        todoTasks.append(.init(id: todoTask.id, name: todoTask.name, isCompleted: true))
-    }
-
-    private mutating func moveUp(_ todoTask: TodoTask) {
-        todoTasks.removeAll { $0.id == todoTask.id }
-        todoTasks = [.init(id: todoTask.id, name: todoTask.name, isCompleted: false)] + todoTasks
     }
 }
