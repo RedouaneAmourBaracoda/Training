@@ -42,6 +42,7 @@ final class TodoTaskListViewModel: ObservableObject {
             list.add(newTodoTask)
             return .success(())
         } catch {
+            print("REDOUANE ISSUE.")
             return .failure(error)
         }
     }

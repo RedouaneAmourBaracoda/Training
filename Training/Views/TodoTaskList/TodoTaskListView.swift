@@ -13,6 +13,7 @@ struct TodoTaskListView: View {
     @State private var showSheet: Bool = false
     @State private var showAlert: Bool = false
     @State private var alertMessage: String?
+    @State private var saveTask: Task<Void, Never>?
 
     init(todoTasks: [TodoTask] = []) {
         self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(list: .init(todoTasks: todoTasks)))
@@ -82,14 +83,17 @@ struct TodoTaskListView: View {
     
     private func cancelTodoTaskButton() -> some View {
         Button(role: .cancel) {
+            saveTask?.cancel()
+            saveTask = nil
             dismissSheet()
         }
     }
     
     private func saveTodoTaskButton() -> some View {
         Button(role: .confirm) {
-            Task {
+            saveTask = Task {
                 let result = await viewModel.save(todoTaskName: text)
+                guard Task.isCancelled == false else { return }
                 switch result {
                 case .success(()):
                     dismissSheet()
@@ -144,3 +148,4 @@ fileprivate struct LoadingActivity: ViewModifier {
 #Preview {
     TodoTaskListView(todoTasks: .random())
 }
+
