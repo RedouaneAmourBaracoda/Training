@@ -31,7 +31,7 @@ enum AddTodoError: Error {
     case empty
     case unknown
     
-    var description: String {
+    var userMessage: String {
         switch self {
         case .empty: "A task cannot be empty."
         case .unknown: "An unknown error with the server occured. Please try again later."

@@ -8,22 +8,11 @@
 import Combine
 import Foundation
 
-fileprivate enum AddTodoState {
-    case idle
-    case isLoading
-}
-
 final class TodoTaskListViewModel: ObservableObject {
     @Published var list: TodoTaskList
-    @Published private var addTodoState: AddTodoState = .idle
+    @Published var isLoading : Bool = false
     var uncompletedTasksCount: Int {
         list.unCompletedTasksCount
-    }
-    var isLoading : Bool {
-        switch addTodoState {
-        case .isLoading: return true
-        default : return false
-        }
     }
     private let addTodoUseCase: AddTodoUseCaseType
 
@@ -32,18 +21,13 @@ final class TodoTaskListViewModel: ObservableObject {
         self.addTodoUseCase = addTodoUseCase
     }
 
-    func save(todoTaskName: String) async -> Result<Void, Error> {
-        addTodoState = .isLoading
+    func save(todoTaskName: String) async throws {
+        isLoading = true
         defer {
-            addTodoState = .idle
+            isLoading = false
         }
-        do {
-            let newTodoTask = try await addTodoUseCase.create(todoTaskName: todoTaskName)
-            list.add(newTodoTask)
-            return .success(())
-        } catch {
-            return .failure(error)
-        }
+        let newTodoTask = try await addTodoUseCase.create(todoTaskName: todoTaskName)
+        list.add(newTodoTask)
     }
 
     func delete(_ todoTask: TodoTask) {

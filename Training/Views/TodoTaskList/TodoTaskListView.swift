@@ -92,12 +92,11 @@ struct TodoTaskListView: View {
     private func saveTodoTaskButton() -> some View {
         Button(role: .confirm) {
             saveTask = Task {
-                let result = await viewModel.save(todoTaskName: text)
-                guard Task.isCancelled == false else { return }
-                switch result {
-                case .success(()):
+                do {
+                    try await viewModel.save(todoTaskName: text)
                     dismissSheet()
-                case let .failure(error):
+                } catch {
+                    guard !Task.isCancelled else { return }
                     presentAlert(error: error)
                 }
             }
@@ -106,10 +105,12 @@ struct TodoTaskListView: View {
     }
 
     private func presentAlert(error: Error) {
-        if let error = error as? AddTodoError {
-            alertMessage = error.description
+        if let _ = error as? CancellationError {
+            return
+        } else if let error = error as? AddTodoError {
+            alertMessage = error.userMessage
         } else {
-            alertMessage = AddTodoError.unknown.description
+            alertMessage = AddTodoError.unknown.userMessage
         }
         showAlert = true
     }
