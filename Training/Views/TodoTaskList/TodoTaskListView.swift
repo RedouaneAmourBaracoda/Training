@@ -16,7 +16,11 @@ struct TodoTaskListView: View {
     @State private var saveTask: Task<Void, Never>?
 
     init(todoTasks: [TodoTask] = []) {
-        self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(list: .init(todoTasks: todoTasks)))
+        self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(
+                list: .init(todoTasks: todoTasks),
+                addTodoUseCase: AddTodoUseCase(),
+                loadTodoUseCase: LoadTodoUseCase()
+            ))
     }
 
     var body: some View {

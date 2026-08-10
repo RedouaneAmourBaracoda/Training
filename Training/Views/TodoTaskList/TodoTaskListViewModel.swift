@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 
+@MainActor
 final class TodoTaskListViewModel: ObservableObject {
     @Published private(set) var list: TodoTaskList
     @Published private(set) var isLoading : Bool = false
@@ -17,7 +18,7 @@ final class TodoTaskListViewModel: ObservableObject {
     private let addTodoUseCase: AddTodoUseCaseType
     private let loadTodoUseCase: LoadTodoUseCaseType
 
-    init(list: TodoTaskList, addTodoUseCase: AddTodoUseCaseType = AddTodoUseCase(), loadTodoUseCase: LoadTodoUseCaseType = LoadTodoUseCase()) {
+    init(list: TodoTaskList, addTodoUseCase: AddTodoUseCaseType, loadTodoUseCase: LoadTodoUseCaseType) {
         self.list = list
         self.addTodoUseCase = addTodoUseCase
         self.loadTodoUseCase = loadTodoUseCase
@@ -26,7 +27,8 @@ final class TodoTaskListViewModel: ObservableObject {
     func loadTodos() async throws {
         isLoading = true
         let todoTasks = try await loadTodoUseCase.load()
-        todoTasks.forEach { list.add($0) }
+//        todoTasks.forEach { list.add($0) }
+        todoTasks.forEach { print($0.name) }
         isLoading = false
     }
 
@@ -45,3 +47,4 @@ final class TodoTaskListViewModel: ObservableObject {
         list.toggleCompletion(todoTask)
     }
 }
+
