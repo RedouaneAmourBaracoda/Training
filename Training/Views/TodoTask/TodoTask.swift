@@ -8,11 +8,11 @@
 import Foundation
 
 struct TodoTask: Identifiable {
-    let id: UUID
+    let id: Int
     let name: String
     var isCompleted: Bool
     
-    init(id: UUID = .init(), name: String, isCompleted: Bool = false) {
+    init(id: Int, name: String, isCompleted: Bool = false) {
         self.id = id
         self.name = name
         self.isCompleted = isCompleted
@@ -54,6 +54,7 @@ extension Array<TodoTask> {
 extension TodoTask {
     static func random() -> Self {
         .init(
+            id: Int.random(in: 0...1000),
             name: Resources.TodoTasks.dummies.randomElement() ?? Resources.TodoTasks.default,
             isCompleted: .random()
         )

@@ -15,7 +15,7 @@ struct AddTodoUseCase: AddTodoUseCaseType {
     func create(todoTaskName: String) async throws -> TodoTask {
         let normalizedName = try normalize(todoTaskName)
         try await Task.sleep(nanoseconds: 2_000_000_000)
-        return .init(name: normalizedName)
+        return .init(id: UUID().hashValue, name: normalizedName)
     }
 
     private func normalize(_ todoTaskName: String) throws -> String {

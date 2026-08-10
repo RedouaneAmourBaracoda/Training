@@ -15,19 +15,26 @@ final class TodoTaskListViewModel: ObservableObject {
         list.unCompletedTasksCount
     }
     private let addTodoUseCase: AddTodoUseCaseType
+    private let loadTodoUseCase: LoadTodoUseCaseType
 
-    init(list: TodoTaskList, addTodoUseCase: AddTodoUseCaseType = AddTodoUseCase()) {
+    init(list: TodoTaskList, addTodoUseCase: AddTodoUseCaseType = AddTodoUseCase(), loadTodoUseCase: LoadTodoUseCaseType = LoadTodoUseCase()) {
         self.list = list
         self.addTodoUseCase = addTodoUseCase
+        self.loadTodoUseCase = loadTodoUseCase
+    }
+
+    func loadTodos() async throws {
+        isLoading = true
+        let todoTasks = try await loadTodoUseCase.load()
+        todoTasks.forEach { list.add($0) }
+        isLoading = false
     }
 
     func save(todoTaskName: String) async throws {
         isLoading = true
-        defer {
-            isLoading = false
-        }
         let newTodoTask = try await addTodoUseCase.create(todoTaskName: todoTaskName)
         list.add(newTodoTask)
+        isLoading = false
     }
 
     func delete(_ todoTask: TodoTask) {
