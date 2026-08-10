@@ -15,7 +15,7 @@ struct LoadTodoUseCase: LoadTodoUseCaseType {
     private let apiClient: APIClientType
     private let todoEndpointBuilder: TodoEndpointBuilder
 
-    init(apiClient: APIClientType = APIClient(), todoEndpointBuilder: TodoEndpointBuilder = TodoEndpointBuilder(baseURL: URL(string: "")!) ) {
+    init(apiClient: APIClientType = APIClient(), todoEndpointBuilder: TodoEndpointBuilder = TodoEndpointBuilder() ) {
         self.apiClient = apiClient
         self.todoEndpointBuilder = todoEndpointBuilder
     }

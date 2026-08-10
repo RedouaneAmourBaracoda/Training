@@ -7,11 +7,16 @@
 
 import Foundation
 
+struct TodoAPIConfiguration {
+    let url: URL = URL(string: "https://yjictxhqmuklxifmctgi.supabase.co/rest/v1/todos")!
+    let publishableKey: String = "sb_publishable_vgkCWo7arXRfzis11Db12Q_E1UlVO3Z"
+}
+
 struct TodoEndpointBuilder {
-    private let baseURL: URL
+    private let todoApiConfiguration: TodoAPIConfiguration
     
-    init(baseURL: URL) {
-        self.baseURL = baseURL
+    init(todoApiConfiguration: TodoAPIConfiguration = .init()) {
+        self.todoApiConfiguration = todoApiConfiguration
     }
 
     enum TodoEndpoint {
@@ -31,7 +36,9 @@ struct TodoEndpointBuilder {
     }
 
     func makeRequest(for endpoint: TodoEndpoint) throws -> URLRequest {
-        var request = URLRequest(url: baseURL)
+        var request = URLRequest(url: todoApiConfiguration.url)
+        request.setValue(todoApiConfiguration.publishableKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = endpoint.httpMethod
         switch endpoint {
         case .load:
