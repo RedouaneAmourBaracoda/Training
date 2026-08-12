@@ -15,9 +15,8 @@ struct TodoTaskListView: View {
     @State private var alertMessage: String?
     @State private var saveTask: Task<Void, Never>?
 
-    init(todoTasks: [TodoTask] = []) {
+    init() {
         self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(
-                list: .init(todoTasks: todoTasks),
                 addTodoUseCase: AddTodoUseCase(),
                 loadTodoUseCase: LoadTodoUseCase()
             ))
@@ -30,12 +29,9 @@ struct TodoTaskListView: View {
                 addTodoTaskButton()
             }
             .navigationTitle(Resources.Titles.navigationStackTitle)
-            .sheet(isPresented: $showSheet) {
-                sheetContent()
-            }
         }
     }
-    
+
     private func list() -> some View {
         List {
             ForEach(viewModel.list.todoTasks) { todoTask in
@@ -51,6 +47,19 @@ struct TodoTaskListView: View {
             }
             Text(Resources.Titles.remainingTasks + "\(viewModel.uncompletedTasksCount)")
         }
+        .loadingActivity(isAnimating: viewModel.isLoading)
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text(alertMessage ?? "Error"), dismissButton: .cancel(Text("Ok"), action: {
+                alertMessage = nil
+            }))
+        }
+        .task {
+            do {
+                try await viewModel.loadTodos()
+            } catch {
+                presentAlert(error: error)
+            }
+        }
     }
 
     private func addTodoTaskButton() -> some View {
@@ -61,6 +70,9 @@ struct TodoTaskListView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 30)
+        }
+        .sheet(isPresented: $showSheet) {
+            sheetContent()
         }
     }
     
@@ -96,7 +108,10 @@ struct TodoTaskListView: View {
     private func saveTodoTaskButton() -> some View {
         Button(role: .confirm) {
             saveTask = Task {
-                defer { saveTask = nil }
+                defer {
+                    saveTask?.cancel()
+                    saveTask = nil
+                }
                 do {
                     try await viewModel.save(todoTaskName: text)
                     dismissSheet()
@@ -152,6 +167,6 @@ fileprivate struct LoadingActivity: ViewModifier {
 }
 
 #Preview {
-    TodoTaskListView(todoTasks: .random())
+    TodoTaskListView()
 }
 
