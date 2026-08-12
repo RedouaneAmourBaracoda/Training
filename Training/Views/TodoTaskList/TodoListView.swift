@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct TodoTaskListView: View {
-    @StateObject private var viewModel: TodoTaskListViewModel
+struct TodoListView: View {
+    @StateObject private var viewModel: TodoListViewModel
     @State private var text: String = ""
     @State private var showSheet: Bool = false
     @State private var showAlert: Bool = false
@@ -16,10 +16,7 @@ struct TodoTaskListView: View {
     @State private var saveTask: Task<Void, Never>?
 
     init() {
-        self._viewModel = StateObject(wrappedValue: TodoTaskListViewModel(
-                addTodoUseCase: AddTodoUseCase(),
-                loadTodoUseCase: LoadTodoUseCase()
-            ))
+        self._viewModel = StateObject(wrappedValue: TodoListViewModel(todoUseCase: TodoUseCase()))
     }
 
     var body: some View {
@@ -34,7 +31,7 @@ struct TodoTaskListView: View {
 
     private func list() -> some View {
         List {
-            ForEach(viewModel.list.todoTasks) { todoTask in
+            ForEach(viewModel.todoListOrganizer.list) { todoTask in
                 TodoTaskView(todoTask: todoTask)
                     .onTapGesture { viewModel.toggleCompletion(todoTask) }
                     .swipeActions {
@@ -79,9 +76,9 @@ struct TodoTaskListView: View {
     private func sheetContent() -> some View {
         VStack {
             HStack {
-                cancelTodoTaskButton()
+                cancelButton()
                 Spacer()
-                saveTodoTaskButton()
+                saveButton()
             }
             Spacer()
             TextField(Resources.Titles.textFieldPlaceholder, text: $text)
@@ -97,7 +94,7 @@ struct TodoTaskListView: View {
         .padding()
     }
     
-    private func cancelTodoTaskButton() -> some View {
+    private func cancelButton() -> some View {
         Button(role: .cancel) {
             saveTask?.cancel()
             saveTask = nil
@@ -105,7 +102,7 @@ struct TodoTaskListView: View {
         }
     }
     
-    private func saveTodoTaskButton() -> some View {
+    private func saveButton() -> some View {
         Button(role: .confirm) {
             saveTask = Task {
                 defer {
@@ -113,7 +110,7 @@ struct TodoTaskListView: View {
                     saveTask = nil
                 }
                 do {
-                    try await viewModel.save(todoTaskName: text)
+                    try await viewModel.createTodo(name: text)
                     dismissSheet()
                 } catch {
                     guard !Task.isCancelled else { return }
@@ -127,10 +124,10 @@ struct TodoTaskListView: View {
     private func presentAlert(error: Error) {
         if let _ = error as? CancellationError {
             return
-        } else if let error = error as? AddTodoError {
+        } else if let error = error as? TodoError {
             alertMessage = error.userMessage
         } else {
-            alertMessage = AddTodoError.unknown.userMessage
+            alertMessage = TodoError.unknown.userMessage
         }
         showAlert = true
     }
@@ -138,6 +135,27 @@ struct TodoTaskListView: View {
     private func dismissSheet() {
         showSheet = false
         text = ""
+    }
+}
+
+struct TodoTaskView: View {
+    private let todoTask: TodoTask
+    
+    init(todoTask: TodoTask) {
+        self.todoTask = todoTask
+    }
+
+    var body: some View {
+        HStack {
+            Image(systemName: todoTask.isCompleted ? "checkmark.circle" : "circle")
+                .imageScale(.large)
+                .foregroundStyle(.tint)
+            Text(todoTask.name)
+                .strikethrough(todoTask.isCompleted)
+                .foregroundStyle(todoTask.isCompleted ? .secondary : .primary)
+            Spacer()
+        }
+        .padding()
     }
 }
 
@@ -167,6 +185,6 @@ fileprivate struct LoadingActivity: ViewModifier {
 }
 
 #Preview {
-    TodoTaskListView()
+    TodoListView()
 }
 

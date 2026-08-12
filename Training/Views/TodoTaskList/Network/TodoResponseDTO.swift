@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CreateTodoDTO: Encodable {
+struct TodoRequestDTO: Encodable {
     let name: String
     let description: String
 }
@@ -21,5 +21,5 @@ struct TodoResponseDTO: Decodable {
 }
 
 extension Array<TodoResponseDTO> {
-    var toTodoTasks: [TodoTask] { map { $0.toTodoTask } }
+    var toTodoList: [TodoTask] { map { $0.toTodoTask } }
 }

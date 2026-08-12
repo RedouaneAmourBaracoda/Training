@@ -1,11 +1,44 @@
 //
-//  TodoTask.swift
+//  TodoTaskList.swift
 //  Training
 //
-//  Created by Redouane Amour on 15/07/2026.
+//  Created by Redouane Amour on 22/07/2026.
 //
 
 import Foundation
+
+struct TodoListOrganizer {
+    private(set) var list: [TodoTask]
+
+    var unCompletedTasksCounter: Int {
+        list.filter { !$0.isCompleted }.count
+    }
+
+    init(list: [TodoTask]) {
+        self.list = list
+        sort()
+    }
+
+    mutating func toggleCompletion(_ todoTask: TodoTask) {
+        guard let index = list.firstIndex(where: { $0.id == todoTask.id }) else { return }
+        list[index].toggleCompletion()
+        sort()
+    }
+
+    mutating func add(_ newTodoTask: TodoTask) {
+        list.append(newTodoTask)
+        sort()
+    }
+    
+    mutating func delete(_ todoTask: TodoTask) {
+        list.removeAll { $0.id == todoTask.id }
+        sort()
+    }
+
+    private mutating func sort() {
+        list.sort { !$0.isCompleted && $1.isCompleted }
+    }
+}
 
 struct TodoTask: Identifiable {
     let id: Int
