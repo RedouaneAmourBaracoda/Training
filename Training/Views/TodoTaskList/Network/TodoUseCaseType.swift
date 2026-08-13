@@ -31,9 +31,7 @@ struct TodoUseCase: TodoUseCaseType {
         let normalizedName = try normalize(todoTaskName)
         let request = try todoEndpointBuilder.makeRequest(action: .add(todo: .init(name: normalizedName)))
         let todosDTO: [TodoResponseDTO] = try await todoAPIClient.send(request: request)
-        guard let createdTodo = todosDTO.toTodoList.first(where: { $0.name == normalizedName }) else {
-            throw TodoError.unknown
-        }
+        guard todosDTO.count == 1, let createdTodo = todosDTO.toTodoList.first else { throw TodoError.unknown }
         return createdTodo
     }
 
