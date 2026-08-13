@@ -13,7 +13,7 @@ struct TodoListView: View {
     @State private var showSheet: Bool = false
     @State private var showAlert: Bool = false
     @State private var alertMessage: String?
-    @State private var saveTask: Task<Void, Never>?
+    @State private var loadingTask: Task<Void, Never>?
 
     init() {
         self._viewModel = StateObject(wrappedValue: TodoListViewModel(todoUseCase: TodoUseCase()))
@@ -44,19 +44,15 @@ struct TodoListView: View {
             }
             Text(Resources.Titles.remainingTasks + "\(viewModel.uncompletedTasksCount)")
         }
-        .loadingActivity(isAnimating: viewModel.isLoading)
+        .loadingActivity(isAnimating: loadingTask != nil)
         .alert(isPresented: $showAlert) {
             Alert(title: Text(alertMessage ?? "Error"), dismissButton: .cancel(Text("Ok"), action: {
                 alertMessage = nil
             }))
         }
-        .task {
-            do {
-                try await viewModel.loadTodos()
-            } catch {
-                presentAlert(error: error)
-            }
-        }
+        .disabled(loadingTask != nil)
+        .onAppear { syncTodos { try await viewModel.loadTodos() }}
+        .refreshable { syncTodos { try await viewModel.loadTodos() }}
     }
 
     private func addTodoTaskButton() -> some View {
@@ -68,6 +64,7 @@ struct TodoListView: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 30)
         }
+        .disabled(loadingTask != nil)
         .sheet(isPresented: $showSheet) {
             sheetContent()
         }
@@ -85,7 +82,7 @@ struct TodoListView: View {
                 .textFieldStyle(.roundedBorder)
             Spacer()
         }
-        .loadingActivity(isAnimating: viewModel.isLoading)
+        .loadingActivity(isAnimating: loadingTask != nil)
         .alert(isPresented: $showAlert) {
             Alert(title: Text(alertMessage ?? "Error"), dismissButton: .cancel(Text("Ok"), action: {
                 alertMessage = nil
@@ -96,29 +93,36 @@ struct TodoListView: View {
     
     private func cancelButton() -> some View {
         Button(role: .cancel) {
-            saveTask?.cancel()
-            saveTask = nil
+            loadingTask?.cancel()
+            loadingTask = nil
             dismissSheet()
         }
     }
     
     private func saveButton() -> some View {
         Button(role: .confirm) {
-            saveTask = Task {
-                defer {
-                    saveTask?.cancel()
-                    saveTask = nil
-                }
-                do {
-                    try await viewModel.createTodo(name: text)
-                    dismissSheet()
-                } catch {
-                    guard !Task.isCancelled else { return }
-                    presentAlert(error: error)
-                }
+            syncTodos {
+                try await viewModel.createTodo(name: text)
+                dismissSheet()
             }
         }
-        .disabled(viewModel.isLoading)
+        .disabled(loadingTask != nil)
+    }
+
+    private func syncTodos(asyncAction: (() async throws -> Void)? = nil) {
+        guard loadingTask == nil else { return }
+        loadingTask = Task {
+            defer {
+                loadingTask?.cancel()
+                loadingTask = nil
+            }
+            do {
+                try await asyncAction?()
+            } catch {
+                guard !Task.isCancelled else { return }
+                presentAlert(error: error)
+            }
+        }
     }
 
     private func presentAlert(error: Error) {

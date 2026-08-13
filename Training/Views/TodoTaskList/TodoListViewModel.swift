@@ -11,7 +11,6 @@ import Foundation
 @MainActor
 final class TodoListViewModel: ObservableObject {
     @Published private(set) var todoListOrganizer: TodoListOrganizer = .init(list: [])
-    @Published private(set) var isLoading : Bool = false
     var uncompletedTasksCount: Int {
         todoListOrganizer.unCompletedTasksCounter
     }
@@ -22,17 +21,13 @@ final class TodoListViewModel: ObservableObject {
     }
 
     func loadTodos() async throws {
-        isLoading = true
-        let todoTasks = try await todoUseCase.load()
-        todoTasks.forEach { todoListOrganizer.add($0) }
-        isLoading = false
+        let newList = try await todoUseCase.load()
+        todoListOrganizer.update(with: newList)
     }
 
     func createTodo(name: String) async throws {
-        isLoading = true
         let newTodoTask = try await todoUseCase.create(todoTaskName: name)
         todoListOrganizer.add(newTodoTask)
-        isLoading = false
     }
 
     func delete(_ todoTask: TodoTask) {

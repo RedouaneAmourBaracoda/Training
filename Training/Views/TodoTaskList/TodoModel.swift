@@ -24,9 +24,14 @@ struct TodoListOrganizer {
         list[index].toggleCompletion()
         sort()
     }
+    
+    mutating func update(with newList: [TodoTask]) {
+        list = newList
+        sort()
+    }
 
-    mutating func add(_ newTodoTask: TodoTask) {
-        list.append(newTodoTask)
+    mutating func add(_ newTodo: TodoTask) {
+        list.append(newTodo)
         sort()
     }
     
