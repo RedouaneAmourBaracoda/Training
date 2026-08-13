@@ -29,14 +29,18 @@ struct TodoUseCase: TodoUseCaseType {
 
     func create(todoTaskName: String) async throws -> TodoTask {
         let normalizedName = try normalize(todoTaskName)
-        try await Task.sleep(nanoseconds: 2_000_000_000)
-        return .init(id: UUID().hashValue, name: normalizedName)
+        let request = try todoEndpointBuilder.makeRequest(action: .add(todo: .init(name: normalizedName)))
+        let todosDTO: [TodoResponseDTO] = try await todoAPIClient.send(request: request)
+        guard let createdTodo = todosDTO.toTodoList.first(where: { $0.name == normalizedName }) else {
+            throw TodoError.unknown
+        }
+        return createdTodo
     }
 
     private func normalize(_ todoTaskName: String) throws -> String {
         let trimmedText = todoTaskName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else {
-            throw TodoError.empty
+            throw TodoError.emptyName
         }
         return trimmedText
     }
@@ -74,13 +78,14 @@ struct TodoEndpointBuilder {
         var request = URLRequest(url: todoAPIConfiguration.url)
         request.setValue(todoAPIConfiguration.publishableKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpMethod = request.httpMethod
+        request.httpMethod = action.httpMethod
         switch action {
         case .load:
             break
         case let .add(todo):
             request.httpBody = try JSONEncoder().encode(todo)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("return=representation", forHTTPHeaderField: "Prefer")
         case let .delete(id):
             request.url?.appendPathComponent("\(id)")
         case let .update(id, todo):
@@ -93,13 +98,15 @@ struct TodoEndpointBuilder {
 }
 
 enum TodoError: Error {
-    case empty
+    case emptyName
+    case encoding
     case unknown
     
     var userMessage: String {
         switch self {
-        case .empty: "A task cannot be empty."
+        case .emptyName: "A task cannot be empty."
         case .unknown: "An unknown error with the server occured. Please try again later."
+        case .encoding: "DTO couldn't be encoded in JSON. Please try again later."
         }
     }
 }

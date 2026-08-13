@@ -9,7 +9,12 @@ import Foundation
 
 struct TodoRequestDTO: Encodable {
     let name: String
-    let description: String
+    let status: Bool
+    
+    init(name: String, status: Bool = false) {
+        self.name = name
+        self.status = status
+    }
 }
 
 struct TodoResponseDTO: Decodable {
