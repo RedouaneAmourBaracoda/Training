@@ -10,6 +10,7 @@ import Foundation
 protocol TodoUseCaseType {
     func load() async throws -> [TodoTask]
     func create(todoTaskName: String) async throws -> TodoTask
+    func update(todoTask: TodoTask) async throws -> TodoTask
 }
 
 struct TodoUseCase: TodoUseCaseType {
@@ -33,6 +34,13 @@ struct TodoUseCase: TodoUseCaseType {
         let todosDTO: [TodoResponseDTO] = try await todoAPIClient.send(request: request)
         guard todosDTO.count == 1, let createdTodo = todosDTO.toTodoList.first else { throw TodoError.unknown }
         return createdTodo
+    }
+
+    func update(todoTask: TodoTask) async throws -> TodoTask {
+        let request = try todoEndpointBuilder.makeRequest(action: .update(id: todoTask.id, todo: .init(todoTask)))
+        let todosDTO: [TodoResponseDTO] = try await todoAPIClient.send(request: request)
+        guard todosDTO.count == 1, let updatedTodo = todosDTO.toTodoList.first else { throw TodoError.unknown }
+        return updatedTodo
     }
 
     private func normalize(_ todoTaskName: String) throws -> String {
@@ -87,9 +95,13 @@ struct TodoEndpointBuilder {
         case let .delete(id):
             request.url?.appendPathComponent("\(id)")
         case let .update(id, todo):
-            request.url?.appendPathComponent("\(id)")
+            guard let url = request.url else { throw TodoError.unknown }
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            components.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
+            request.url = components.url!
             request.httpBody = try JSONEncoder().encode(todo)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("return=representation", forHTTPHeaderField: "Prefer")
         }
         return request
     }

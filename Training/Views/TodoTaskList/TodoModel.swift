@@ -30,6 +30,12 @@ struct TodoListOrganizer {
         sort()
     }
 
+    mutating func update(todoTask: TodoTask) {
+        guard let index = list.firstIndex(where: { $0.id == todoTask.id }) else { return }
+        list[index] = todoTask
+        sort()
+    }
+
     mutating func add(_ newTodo: TodoTask) {
         list.append(newTodo)
         sort()

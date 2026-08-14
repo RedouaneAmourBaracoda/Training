@@ -33,7 +33,7 @@ struct TodoListView: View {
         List {
             ForEach(viewModel.todoListOrganizer.list) { todoTask in
                 TodoTaskView(todoTask: todoTask)
-                    .onTapGesture { viewModel.toggleCompletion(todoTask) }
+                    .onTapGesture { syncTodos { try await viewModel.update(todoTask) } }
                     .swipeActions {
                         Button(role: .destructive) {
                             viewModel.delete(todoTask)
@@ -191,4 +191,3 @@ fileprivate struct LoadingActivity: ViewModifier {
 #Preview {
     TodoListView()
 }
-

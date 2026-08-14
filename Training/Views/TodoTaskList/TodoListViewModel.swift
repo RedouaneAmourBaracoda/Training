@@ -30,12 +30,18 @@ final class TodoListViewModel: ObservableObject {
         todoListOrganizer.add(newTodoTask)
     }
 
+    func update(_ todoTask: TodoTask) async throws {
+        let updatedTodo = try await todoUseCase.update(
+            todoTask: .init(
+                id: todoTask.id,
+                name: todoTask.name,
+                isCompleted: todoTask.isCompleted ? false : true
+            )
+        )
+        todoListOrganizer.update(todoTask: updatedTodo)
+    }
+
     func delete(_ todoTask: TodoTask) {
         todoListOrganizer.delete(todoTask)
     }
-    
-    func toggleCompletion(_ todoTask: TodoTask) {
-        todoListOrganizer.toggleCompletion(todoTask)
-    }
 }
-

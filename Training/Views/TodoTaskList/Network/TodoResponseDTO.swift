@@ -15,6 +15,11 @@ struct TodoRequestDTO: Encodable {
         self.name = name
         self.status = status
     }
+    
+    init(_ todoTask: TodoTask) {
+        name = todoTask.name
+        status = todoTask.isCompleted
+    }
 }
 
 struct TodoResponseDTO: Decodable {
