@@ -113,7 +113,6 @@ struct TodoEndpointBuilder {
             components.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
             request.url = components.url!
             request.httpBody = try JSONEncoder().encode(todo)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue("return=representation", forHTTPHeaderField: "Prefer")
         }
         return request

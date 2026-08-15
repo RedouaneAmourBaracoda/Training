@@ -77,7 +77,7 @@ struct TodoTask: Identifiable {
 
 extension TodoTask: Equatable {
     static func == (lhs: TodoTask, rhs: TodoTask) -> Bool {
-        lhs.name == rhs.name && lhs.isCompleted == rhs.isCompleted
+        lhs.id == rhs.id
     }
 }
 
