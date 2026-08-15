@@ -36,7 +36,7 @@ struct TodoListView: View {
                     .onTapGesture { syncTodos { try await viewModel.update(todoTask) } }
                     .swipeActions {
                         Button(role: .destructive) {
-                            viewModel.delete(todoTask)
+                            syncTodos { try await viewModel.delete(todoTask) }
                         } label: {
                             Image(systemName: "trash")
                         }

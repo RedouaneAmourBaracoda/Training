@@ -11,6 +11,7 @@ protocol TodoUseCaseType {
     func load() async throws -> [TodoTask]
     func create(todoTaskName: String) async throws -> TodoTask
     func update(todoTask: TodoTask) async throws -> TodoTask
+    func delete(todoTask: TodoTask) async throws -> TodoTask
 }
 
 struct TodoUseCase: TodoUseCaseType {
@@ -41,6 +42,13 @@ struct TodoUseCase: TodoUseCaseType {
         let todosDTO: [TodoResponseDTO] = try await todoAPIClient.send(request: request)
         guard todosDTO.count == 1, let updatedTodo = todosDTO.toTodoList.first else { throw TodoError.unknown }
         return updatedTodo
+    }
+    
+    func delete(todoTask: TodoTask) async throws -> TodoTask {
+        let request = try todoEndpointBuilder.makeRequest(action: .delete(id: todoTask.id))
+        let todosDTO: [TodoResponseDTO] = try await todoAPIClient.send(request: request)
+        guard todosDTO.count == 1, let deletedTodo = todosDTO.toTodoList.first else { throw TodoError.unknown }
+        return deletedTodo
     }
 
     private func normalize(_ todoTaskName: String) throws -> String {
@@ -93,7 +101,12 @@ struct TodoEndpointBuilder {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue("return=representation", forHTTPHeaderField: "Prefer")
         case let .delete(id):
-            request.url?.appendPathComponent("\(id)")
+            guard let url = request.url else { throw TodoError.unknown }
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            components.queryItems = [URLQueryItem(name: "id", value: "eq.\(id)")]
+            request.url = components.url!
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("return=representation", forHTTPHeaderField: "Prefer")
         case let .update(id, todo):
             guard let url = request.url else { throw TodoError.unknown }
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!

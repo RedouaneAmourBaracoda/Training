@@ -41,7 +41,8 @@ final class TodoListViewModel: ObservableObject {
         todoListOrganizer.update(todoTask: updatedTodo)
     }
 
-    func delete(_ todoTask: TodoTask) {
-        todoListOrganizer.delete(todoTask)
+    func delete(_ todoTask: TodoTask) async throws {
+        let deletedTask = try await todoUseCase.delete(todoTask: todoTask)
+        todoListOrganizer.delete(deletedTask)
     }
 }
