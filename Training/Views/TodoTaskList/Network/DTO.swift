@@ -51,6 +51,6 @@ struct AuthResponseDTO: Decodable {
     }
 }
 
-struct UserDTO: Codable {
+struct UserDTO: Decodable {
     let id: String
 }
