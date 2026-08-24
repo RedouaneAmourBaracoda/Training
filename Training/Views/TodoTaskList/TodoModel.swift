@@ -51,7 +51,7 @@ struct TodoListOrganizer {
     }
 }
 
-struct TodoTask: Identifiable {
+struct TodoTask: Identifiable, Equatable, Hashable {
     let id: Int
     let name: String
     var isCompleted: Bool
@@ -72,18 +72,6 @@ struct TodoTask: Identifiable {
     
     private mutating func unComplete() {
         isCompleted = false
-    }
-}
-
-extension TodoTask: Equatable {
-    static func == (lhs: TodoTask, rhs: TodoTask) -> Bool {
-        lhs.id == rhs.id
-    }
-}
-
-extension TodoTask: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
     }
 }
 
